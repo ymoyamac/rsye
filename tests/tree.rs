@@ -1,14 +1,14 @@
-use rsye::Tree;
+use rsye::BSTree;
 
 #[test]
 fn new_tree() {
-    let tree = Tree::<i32>::new();
+    let tree = BSTree::<i32>::new();
     assert_eq!(0, tree.height());
 }
 
 #[test]
 fn insert_tree() {
-    let mut tree = Tree::<i32>::new();
+    let mut tree = BSTree::<i32>::new();
     tree.insert(1);
     tree.insert(3);
     tree.insert(5);

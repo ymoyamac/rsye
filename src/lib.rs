@@ -1,9 +1,9 @@
 use std::ptr::NonNull;
 
+pub mod bstree;
 pub mod node;
-pub mod tree;
 
+pub use bstree::BSTree;
 pub use node::Node;
-pub use tree::Tree;
 
 pub(crate) type Ptr<T> = Option<NonNull<T>>;

@@ -1,14 +1,17 @@
 use crate::{Ptr, node::Node};
+use std::fmt::Debug;
+use std::ptr::NonNull;
 
-pub struct Tree<T>
+#[derive(Debug)]
+pub struct BSTree<T>
 where
-    T: PartialOrd,
+    T: PartialOrd + Debug,
 {
     pub root: Ptr<Node<T>>,
     pub height: u32,
 }
 
-impl<T: PartialOrd> Default for Tree<T> {
+impl<T: PartialOrd + Debug> Default for BSTree<T> {
     fn default() -> Self {
         Self {
             root: None,
@@ -17,7 +20,7 @@ impl<T: PartialOrd> Default for Tree<T> {
     }
 }
 
-impl<T: PartialOrd> Tree<T> {
+impl<T: PartialOrd + Debug> BSTree<T> {
     pub fn new() -> Self {
         Self {
             root: None,
@@ -66,5 +69,29 @@ impl<T: PartialOrd> Tree<T> {
                 }
             }
         }
+    }
+
+    //Breadth-First Search
+    pub fn bfs(&mut self, to_find: T) -> Option<&T> {
+        let root = self.root?;
+        use std::collections::VecDeque;
+        let mut queue = VecDeque::<NonNull<Node<T>>>::new();
+        unsafe {
+            queue.push_back(root);
+            while let Some(current) = queue.pop_front() {
+                if (*current.as_ptr()).data == to_find {
+                    return Some(&(*current.as_ptr()).data);
+                }
+                match (*current.as_ptr()).left {
+                    Some(left) => queue.push_back(left),
+                    None => (),
+                };
+                match (*current.as_ptr()).right {
+                    Some(right) => queue.push_back(right),
+                    None => (),
+                };
+            }
+        }
+        None
     }
 }
