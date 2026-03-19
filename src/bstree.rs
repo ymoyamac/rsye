@@ -82,14 +82,12 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                 if (*current.as_ptr()).data == to_find {
                     return Some(&(*current.as_ptr()).data);
                 }
-                match (*current.as_ptr()).left {
-                    Some(left) => queue.push_back(left),
-                    None => (),
-                };
-                match (*current.as_ptr()).right {
-                    Some(right) => queue.push_back(right),
-                    None => (),
-                };
+                if let Some(left) = (*current.as_ptr()).left {
+                    queue.push_back(left);
+                }
+                if let Some(right) = (*current.as_ptr()).right {
+                    queue.push_back(right);
+                }
             }
         }
         None
