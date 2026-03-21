@@ -1,4 +1,4 @@
-use rsye::BSTree;
+use rsye::core::BSTree;
 
 #[test]
 fn new_tree() {

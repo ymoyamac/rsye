@@ -1,4 +1,4 @@
-use crate::{Ptr, node::Node};
+use crate::{Ptr, core::Node};
 use std::fmt::Debug;
 use std::ptr::NonNull;
 
@@ -72,9 +72,9 @@ impl<T: PartialOrd + Debug> BSTree<T> {
     }
 
     //Breadth-First Search
-    pub fn bfs(&mut self, to_find: T) -> Option<&T> {
-        let root = self.root?;
+    pub fn bfs(&self, to_find: T) -> Option<&T> {
         use std::collections::VecDeque;
+        let root = self.root?;
         let mut queue = VecDeque::<NonNull<Node<T>>>::new();
         unsafe {
             queue.push_back(root);
@@ -87,6 +87,27 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                 }
                 if let Some(right) = (*current.as_ptr()).right {
                     queue.push_back(right);
+                }
+            }
+        }
+        None
+    }
+
+    //Depth-First Search
+    pub fn dfs(&self, to_find: T) -> Option<&T> {
+        let mut stack = Vec::<NonNull<Node<T>>>::new();
+        let root = self.root?;
+        unsafe {
+            stack.push(root);
+            while let Some(current) = stack.pop() {
+                if (*current.as_ptr()).data == to_find {
+                    return Some(&(*current.as_ptr()).data);
+                }
+                if let Some(right) = (*current.as_ptr()).right {
+                    stack.push(right);
+                }
+                if let Some(left) = (*current.as_ptr()).left {
+                    stack.push(left);
                 }
             }
         }
