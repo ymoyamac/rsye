@@ -148,37 +148,37 @@ fn dfs_on_empty_tree_returns_none() {
 #[test]
 fn to_vec_returns_sorted_values() {
     let tree = BSTree::from([5, 3, 7, 1, 4]);
-    assert_eq!(tree.to_vec(), vec![1, 3, 4, 5, 7]);
+    assert_eq!(tree.as_vec(), vec![1, 3, 4, 5, 7]);
 }
 
 #[test]
 fn to_vec_single_node() {
     let tree = BSTree::from([42]);
-    assert_eq!(tree.to_vec(), vec![42]);
+    assert_eq!(tree.as_vec(), vec![42]);
 }
 
 #[test]
 fn to_vec_empty_tree() {
     let tree: BSTree<i32> = BSTree::new();
-    assert_eq!(tree.to_vec(), vec![]);
+    assert_eq!(tree.as_vec(), vec![]);
 }
 
 #[test]
 fn to_vec_already_sorted_input() {
     let tree = BSTree::from([1, 2, 3, 4, 5]);
-    assert_eq!(tree.to_vec(), vec![1, 2, 3, 4, 5]);
+    assert_eq!(tree.as_vec(), vec![1, 2, 3, 4, 5]);
 }
 
 #[test]
 fn to_vec_reverse_sorted_input() {
     let tree = BSTree::from([5, 4, 3, 2, 1]);
-    assert_eq!(tree.to_vec(), vec![1, 2, 3, 4, 5]);
+    assert_eq!(tree.as_vec(), vec![1, 2, 3, 4, 5]);
 }
 
 #[test]
 fn to_vec_with_negative_values() {
     let tree = BSTree::from([0, -1, 5, 3, 4]);
-    assert_eq!(tree.to_vec(), vec![-1, 0, 3, 4, 5]);
+    assert_eq!(tree.as_vec(), vec![-1, 0, 3, 4, 5]);
 }
 
 #[test]
