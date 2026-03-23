@@ -28,6 +28,14 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         }
     }
 
+    pub fn root(&self) -> Option<&T> {
+        unsafe { Some(&(*self.root.unwrap().as_ptr()).data) }
+    }
+
+    pub fn root_mut(&self) -> Option<&mut T> {
+        unsafe { Some(&mut (*self.root.unwrap().as_ptr()).data) }
+    }
+
     pub fn height(&self) -> u32 {
         self.height
     }
@@ -112,5 +120,60 @@ impl<T: PartialOrd + Debug> BSTree<T> {
             }
         }
         None
+    }
+
+    //inorder
+    pub fn to_vec(self) -> Vec<T> {
+        let mut values = Vec::<T>::new();
+        let mut stack = Vec::<NonNull<Node<T>>>::new();
+        unsafe {
+            let mut current = self.root;
+            while current.is_some() || !stack.is_empty() {
+                if let Some(node) = current {
+                    stack.push(node);
+                    current = (*node.as_ptr()).left;
+                } else {
+                    let last = stack.pop().unwrap();
+                    values.push(std::ptr::read(&(*last.as_ptr()).data));
+                    current = (*last.as_ptr()).right;
+                }
+            }
+        }
+        values
+    }
+}
+
+impl<T: PartialOrd + Debug, const N: usize> From<[T; N]> for BSTree<T> {
+    fn from(values: [T; N]) -> Self {
+        let mut tree = BSTree::<T>::new();
+
+        for v in values {
+            tree.insert(v);
+        }
+        tree
+    }
+}
+
+impl<T: PartialOrd + Debug> Drop for BSTree<T> {
+    fn drop(&mut self) {
+        let mut path = Vec::<NonNull<Node<T>>>::new();
+        let mut nodes = Vec::<NonNull<Node<T>>>::new();
+        unsafe {
+            if let Some(root) = self.root {
+                path.push(root);
+                while let Some(current) = path.pop() {
+                    nodes.push(current);
+                    if let Some(left) = (*current.as_ptr()).left {
+                        path.push(left);
+                    }
+                    if let Some(right) = (*current.as_ptr()).right {
+                        path.push(right);
+                    }
+                }
+            }
+            while let Some(current) = nodes.pop() {
+                drop(Box::from_raw(current.as_ptr()));
+            }
+        }
     }
 }
