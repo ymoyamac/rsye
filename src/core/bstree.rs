@@ -152,6 +152,22 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         None
     }
 
+    pub fn search(&self, to_find: T) -> Option<&T> {
+        let mut root = self.root;
+        unsafe {
+            while let Some(current) = root {
+                if to_find < (*current.as_ptr()).data {
+                    root = (*current.as_ptr()).left;
+                } else if to_find > (*current.as_ptr()).data {
+                    root = (*current.as_ptr()).right;
+                } else {
+                    return Some(&(*current.as_ptr()).data);
+                }
+            }
+        }
+        None
+    }
+
     //inorder
     pub fn as_vec(self) -> Vec<T> {
         let mut values = Vec::<T>::new();

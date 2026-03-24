@@ -206,3 +206,39 @@ fn drop_empty_tree_does_not_panic() {
     let tree: BSTree<i32> = BSTree::new();
     drop(tree);
 }
+
+#[test]
+fn search_finds_root() {
+    let tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.search(5), Some(&5));
+}
+
+#[test]
+fn search_finds_left_node() {
+    let tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.search(3), Some(&3));
+}
+
+#[test]
+fn search_finds_right_node() {
+    let tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.search(7), Some(&7));
+}
+
+#[test]
+fn search_returns_none_when_not_found() {
+    let tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.search(99), None);
+}
+
+#[test]
+fn search_on_empty_tree_returns_none() {
+    let tree: BSTree<i32> = BSTree::new();
+    assert_eq!(tree.search(1), None);
+}
+
+#[test]
+fn search_finds_deep_node() {
+    let tree = BSTree::from([10, 5, 15, 3, 7, 12, 20]);
+    assert_eq!(tree.search(3), Some(&3));
+}
