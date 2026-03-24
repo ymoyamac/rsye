@@ -36,6 +36,10 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         unsafe { Some(&mut (*self.root.unwrap().as_ptr()).data) }
     }
 
+    pub fn root_ptr_mut(&mut self) -> &mut Ptr<Node<T>> {
+        &mut self.root
+    }
+
     pub fn nodes(&self) -> u32 {
         self.nodes
     }
