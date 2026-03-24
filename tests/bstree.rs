@@ -10,34 +10,34 @@ fn new_tree() {
 fn insert_from_slice() {
     let values = [1, 2, 3, 4];
     let tree = BSTree::<i32>::from(values);
-    assert_eq!(tree.root().unwrap(), &values[0]);
+    assert_eq!(tree.data_root(), Some(&2));
 }
 
 #[test]
 fn new_tree_is_empty() {
     let tree: BSTree<i32> = BSTree::new();
-    assert!(tree.root.is_none());
+    assert!(tree.root().is_none());
     assert_eq!(tree.height(), 0);
 }
 
 #[test]
 fn default_tree_is_empty() {
     let tree: BSTree<i32> = BSTree::default();
-    assert!(tree.root.is_none());
+    assert!(tree.root().is_none());
     assert_eq!(tree.height(), 0);
 }
 
 #[test]
 fn insert_single_node_becomes_root() {
     let tree = BSTree::from([1]);
-    assert_eq!(tree.root(), Some(&1));
+    assert_eq!(tree.data_root(), Some(&1));
 }
 
 #[test]
 fn insert_smaller_goes_left() {
     let tree = BSTree::from([5, 3]);
+    let left = tree.left().unwrap();
     unsafe {
-        let left = (*tree.root.unwrap().as_ptr()).left.unwrap();
         assert_eq!((*left.as_ptr()).data, 3);
     }
 }
@@ -45,8 +45,8 @@ fn insert_smaller_goes_left() {
 #[test]
 fn insert_larger_goes_right() {
     let tree = BSTree::from([5, 7]);
+    let right = tree.right().unwrap();
     unsafe {
-        let right = (*tree.root.unwrap().as_ptr()).right.unwrap();
         assert_eq!((*right.as_ptr()).data, 7);
     }
 }
@@ -61,7 +61,7 @@ fn insert_duplicate_is_ignored() {
 fn insert_updates_parent_pointer() {
     let tree = BSTree::from([5, 3]);
     unsafe {
-        let left = (*tree.root.unwrap().as_ptr()).left.unwrap();
+        let left = tree.left().unwrap();
         let parent = (*left.as_ptr()).parent.unwrap();
         assert_eq!((*parent.as_ptr()).data, 5);
     }
@@ -70,7 +70,7 @@ fn insert_updates_parent_pointer() {
 #[test]
 fn insert_updates_height() {
     let tree = BSTree::from([5, 3, 7, 1, 4]);
-    assert_eq!(tree.height(), 5);
+    assert_eq!(tree.height(), 3);
 }
 
 #[test]
@@ -184,14 +184,14 @@ fn to_vec_with_negative_values() {
 #[test]
 fn from_array_builds_correct_tree() {
     let tree = BSTree::from([5, 3, 7]);
-    assert_eq!(tree.root(), Some(&5));
-    assert_eq!(tree.height(), 3);
+    assert_eq!(tree.data_root(), Some(&5));
+    assert_eq!(tree.height(), 2);
 }
 
 #[test]
 fn from_single_element_array() {
     let tree = BSTree::from([42]);
-    assert_eq!(tree.root(), Some(&42));
+    assert_eq!(tree.data_root(), Some(&42));
     assert_eq!(tree.height(), 1);
 }
 

@@ -28,16 +28,32 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         }
     }
 
-    pub fn root(&self) -> Option<&T> {
-        unsafe { Some(&(*self.root.unwrap().as_ptr()).data) }
+    pub fn data_root(&self) -> Option<&T> {
+        self.root.map(|root| unsafe { &(*root.as_ptr()).data })
     }
 
-    pub fn root_mut(&self) -> Option<&mut T> {
-        unsafe { Some(&mut (*self.root.unwrap().as_ptr()).data) }
+    pub fn data_root_mut(&self) -> Option<&mut T> {
+        self.root.map(|root| unsafe { &mut (*root.as_ptr()).data })
     }
 
-    pub fn root_ptr_mut(&mut self) -> &mut Ptr<Node<T>> {
-        &mut self.root
+    pub fn root(&self) -> Option<&NonNull<Node<T>>> {
+        self.root.as_ref()
+    }
+
+    pub fn root_mut(&mut self) -> Option<&mut NonNull<Node<T>>> {
+        self.root.as_mut()
+    }
+
+    pub fn left(&self) -> Option<&NonNull<Node<T>>> {
+        self.root
+            .as_ref()
+            .map(|root| unsafe { (*root.as_ptr()).left.as_ref() })?
+    }
+
+    pub fn right(&self) -> Option<&NonNull<Node<T>>> {
+        self.root
+            .as_ref()
+            .map(|root| unsafe { (*root.as_ptr()).right.as_ref() })?
     }
 
     pub fn nodes(&self) -> u32 {
@@ -70,7 +86,7 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                             (*node.as_ptr()).parent = Some(current);
                             (*current.as_ptr()).left = Some(node);
                             self.nodes += 1;
-                            Self::walk_up(node);
+                            Self::walk_up(self, node);
                             return;
                         }
                     }
@@ -81,7 +97,7 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                             (*node.as_ptr()).parent = Some(current);
                             (*current.as_ptr()).right = Some(node);
                             self.nodes += 1;
-                            Self::walk_up(node);
+                            Self::walk_up(self, node);
                             return;
                         }
                     }
@@ -156,7 +172,7 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         values
     }
 
-    pub fn update_height(node: NonNull<Node<T>>) {
+    pub(crate) fn update_height(node: NonNull<Node<T>>) {
         unsafe {
             let left_height = match (*node.as_ptr()).left {
                 Some(left) => (*left.as_ptr()).height,
@@ -170,28 +186,14 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         }
     }
 
-    fn walk_up(node: NonNull<Node<T>>) {
+    pub(crate) fn walk_up(&mut self, node: NonNull<Node<T>>) {
         let mut current = Some(node);
         unsafe {
             while let Some(n) = current {
                 Self::update_height(n);
+                self.rebalance(n);
                 current = (*n.as_ptr()).parent;
             }
-        }
-    }
-
-    fn balance_factor(node: NonNull<Node<T>>) -> i32 {
-        unsafe {
-            let left_height = match (*node.as_ptr()).left {
-                Some(left) => (*left.as_ptr()).height as i32,
-                None => 0,
-            };
-
-            let right_height = match (*node.as_ptr()).right {
-                Some(right) => (*right.as_ptr()).height as i32,
-                None => 0,
-            };
-            left_height - right_height
         }
     }
 }
