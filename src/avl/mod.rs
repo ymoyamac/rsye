@@ -3,6 +3,31 @@ use std::{fmt::Debug, ptr::NonNull};
 use crate::core::{BSTree, Node};
 
 impl<T: PartialOrd + Debug> BSTree<T> {
+    pub(crate) fn update_height(node: NonNull<Node<T>>) {
+        unsafe {
+            let left_height = match (*node.as_ptr()).left {
+                Some(left) => (*left.as_ptr()).height,
+                None => 0,
+            };
+            let right_height = match (*node.as_ptr()).right {
+                Some(right) => (*right.as_ptr()).height,
+                None => 0,
+            };
+            (*node.as_ptr()).height = 1 + left_height.max(right_height);
+        }
+    }
+
+    pub(crate) fn walk_up(&mut self, node: NonNull<Node<T>>) {
+        let mut current = Some(node);
+        unsafe {
+            while let Some(n) = current {
+                Self::update_height(n);
+                self.rebalance(n);
+                current = (*n.as_ptr()).parent;
+            }
+        }
+    }
+
     pub(crate) fn balance_factor(node: NonNull<Node<T>>) -> i32 {
         unsafe {
             let left_height = match (*node.as_ptr()).left {

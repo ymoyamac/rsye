@@ -67,6 +67,14 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         }
     }
 
+    pub fn len(&self) -> u32 {
+        self.nodes
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.nodes == 0
+    }
+
     pub fn insert(&mut self, data: T) {
         unsafe {
             let node = Node::new_ptr(data);
@@ -188,28 +196,35 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         values
     }
 
-    pub(crate) fn update_height(node: NonNull<Node<T>>) {
+    pub fn contains(&self, data: T) -> bool {
+        self.search(data).is_some()
+    }
+
+    pub fn min(&self) -> Option<&T> {
+        let mut iter = self.root;
         unsafe {
-            let left_height = match (*node.as_ptr()).left {
-                Some(left) => (*left.as_ptr()).height,
-                None => 0,
-            };
-            let right_height = match (*node.as_ptr()).right {
-                Some(right) => (*right.as_ptr()).height,
-                None => 0,
-            };
-            (*node.as_ptr()).height = 1 + left_height.max(right_height);
+            while let Some(current) = iter {
+                if (*current.as_ptr()).left.is_some() {
+                    iter = (*current.as_ptr()).left;
+                } else {
+                    break;
+                }
+            }
+            iter.as_ref().map(|node| &(*node.as_ptr()).data)
         }
     }
 
-    pub(crate) fn walk_up(&mut self, node: NonNull<Node<T>>) {
-        let mut current = Some(node);
+    pub fn max(&self) -> Option<&T> {
+        let mut iter = self.root;
         unsafe {
-            while let Some(n) = current {
-                Self::update_height(n);
-                self.rebalance(n);
-                current = (*n.as_ptr()).parent;
+            while let Some(current) = iter {
+                if (*current.as_ptr()).right.is_some() {
+                    iter = (*current.as_ptr()).right;
+                } else {
+                    break;
+                }
             }
+            iter.as_ref().map(|node| &(*node.as_ptr()).data)
         }
     }
 }

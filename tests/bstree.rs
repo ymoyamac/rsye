@@ -242,3 +242,23 @@ fn search_finds_deep_node() {
     let tree = BSTree::from([10, 5, 15, 3, 7, 12, 20]);
     assert_eq!(tree.search(3), Some(&3));
 }
+
+#[test]
+fn contains() {
+    let tree = BSTree::from([10, 5, 15, 3, 7, 12, 20]);
+    assert_eq!(tree.len(), 7);
+    assert!(tree.contains(12));
+    assert!(!tree.is_empty());
+}
+
+#[test]
+fn min() {
+    let tree = BSTree::from([10, 5, 15, 3, 7, 12, 20]);
+    assert_eq!(tree.min(), Some(&3));
+}
+
+#[test]
+fn max() {
+    let tree = BSTree::from([10, 5, 15, 3, 7, 99, 12, 20]);
+    assert_eq!(tree.max(), Some(&99));
+}
