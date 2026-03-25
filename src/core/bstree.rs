@@ -227,6 +227,42 @@ impl<T: PartialOrd + Debug> BSTree<T> {
             iter.as_ref().map(|node| &(*node.as_ptr()).data)
         }
     }
+
+    pub fn range(&self, min: T, max: T) -> BSTree<T>
+    where
+        T: Clone,
+    {
+        let mut tree = BSTree::<T>::new();
+
+        unsafe {
+            if let Some(root) = self.root {
+                let mut queue = std::collections::VecDeque::<NonNull<Node<T>>>::new();
+                queue.push_back(root);
+                while !queue.is_empty() {
+                    let current = queue.pop_front().unwrap();
+                    if (*current.as_ptr()).data < min {
+                        if let Some(right) = (*current.as_ptr()).right {
+                            queue.push_back(right);
+                        }
+                    } else if (*current.as_ptr()).data > max {
+                        if let Some(left) = (*current.as_ptr()).left {
+                            queue.push_back(left);
+                        }
+                    } else {
+                        tree.insert((*current.as_ptr()).data.clone());
+                        if let Some(right) = (*current.as_ptr()).right {
+                            queue.push_back(right);
+                        }
+                        if let Some(left) = (*current.as_ptr()).left {
+                            queue.push_back(left);
+                        }
+                    }
+                }
+            }
+        }
+
+        tree
+    }
 }
 
 impl<T: PartialOrd + Debug, const N: usize> From<[T; N]> for BSTree<T> {

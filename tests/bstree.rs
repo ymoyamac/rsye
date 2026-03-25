@@ -262,3 +262,31 @@ fn max() {
     let tree = BSTree::from([10, 5, 15, 3, 7, 99, 12, 20]);
     assert_eq!(tree.max(), Some(&99));
 }
+
+#[test]
+fn range_returns_subtree_with_values_in_range() {
+    let tree = BSTree::from([5, 3, 8, 1, 4, 9]);
+    let sub = tree.range(3, 7);
+    assert_eq!(sub.as_vec(), vec![3, 4, 5]);
+}
+
+#[test]
+fn range_full_range_returns_all_values() {
+    let tree = BSTree::from([5, 3, 7]);
+    let sub = tree.range(3, 7);
+    assert_eq!(sub.as_vec(), vec![3, 5, 7]);
+}
+
+#[test]
+fn range_empty_result_when_no_values_in_range() {
+    let tree = BSTree::from([5, 3, 7]);
+    let sub = tree.range(10, 20);
+    assert!(sub.is_empty());
+}
+
+#[test]
+fn range_single_value() {
+    let tree = BSTree::from([5, 3, 7]);
+    let sub = tree.range(5, 5);
+    assert_eq!(sub.as_vec(), vec![5]);
+}
