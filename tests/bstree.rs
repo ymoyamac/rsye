@@ -36,7 +36,7 @@ fn insert_single_node_becomes_root() {
 #[test]
 fn insert_smaller_goes_left() {
     let tree = BSTree::from([5, 3]);
-    let left = tree.left().unwrap();
+    let left = tree.root_left().unwrap();
     unsafe {
         assert_eq!((*left.as_ptr()).data, 3);
     }
@@ -45,7 +45,7 @@ fn insert_smaller_goes_left() {
 #[test]
 fn insert_larger_goes_right() {
     let tree = BSTree::from([5, 7]);
-    let right = tree.right().unwrap();
+    let right = tree.root_right().unwrap();
     unsafe {
         assert_eq!((*right.as_ptr()).data, 7);
     }
@@ -61,7 +61,7 @@ fn insert_duplicate_is_ignored() {
 fn insert_updates_parent_pointer() {
     let tree = BSTree::from([5, 3]);
     unsafe {
-        let left = tree.left().unwrap();
+        let left = tree.root_left().unwrap();
         let parent = (*left.as_ptr()).parent.unwrap();
         assert_eq!((*parent.as_ptr()).data, 5);
     }

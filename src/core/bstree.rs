@@ -2,6 +2,8 @@ use crate::{Ptr, core::Node};
 use std::fmt::Debug;
 use std::ptr::NonNull;
 
+use super::selectable::Child;
+
 #[derive(Debug)]
 pub struct BSTree<T>
 where
@@ -44,13 +46,13 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         self.root.as_mut()
     }
 
-    pub fn left(&self) -> Option<&NonNull<Node<T>>> {
+    pub fn root_left(&self) -> Option<&NonNull<Node<T>>> {
         self.root
             .as_ref()
             .map(|root| unsafe { (*root.as_ptr()).left.as_ref() })?
     }
 
-    pub fn right(&self) -> Option<&NonNull<Node<T>>> {
+    pub fn root_right(&self) -> Option<&NonNull<Node<T>>> {
         self.root
             .as_ref()
             .map(|root| unsafe { (*root.as_ptr()).right.as_ref() })?
@@ -117,15 +119,69 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         }
     }
 
+    pub fn delete(&mut self, to_search: T) -> Option<T>
+    where
+        T: Clone,
+    {
+        let mut root = self.root;
+        unsafe {
+            while let Some(current) = root {
+                if (*current.as_ptr()).data > to_search {
+                    root = (*current.as_ptr()).left;
+                } else if (*current.as_ptr()).data < to_search {
+                    root = (*current.as_ptr()).right;
+                } else {
+                    let data = (*current.as_ptr()).data.clone();
+                    //leaf case, no childs
+
+                    if (*current.as_ptr()).left.is_none() && (*current.as_ptr()).right.is_none() {
+                        match (*current.as_ptr()).parent {
+                            None => self.root = None,
+                            Some(parent) => {
+                                if (*parent.as_ptr()).left == Some(current) {
+                                    (*parent.as_ptr()).left = None;
+                                } else {
+                                    (*parent.as_ptr()).right = None;
+                                }
+
+                                Self::walk_up(self, parent);
+                            }
+                        }
+                        drop(Box::from_raw(current.as_ptr()));
+                        return Some(data);
+                    } else if (*current.as_ptr()).left.is_some()
+                        || (*current.as_ptr()).right.is_some()
+                    {
+                        let parent = (*current.as_ptr()).parent;
+                        let child = match Self::selectable(Some(current)) {
+                            Child::Left(left) => left,
+                            Child::Right(right) => right,
+                            _ => None,
+                        };
+                        if (*parent.unwrap().as_ptr()).left == Some(current) {
+                            (*parent.unwrap().as_ptr()).left = child;
+                        } else {
+                            (*parent.unwrap().as_ptr()).right = child;
+                        }
+                        Self::walk_up(self, parent.unwrap());
+                    }
+                    //TODO: case 3 is missing: Node has children on the left and right
+                }
+            }
+        }
+
+        None
+    }
+
     //Breadth-First Search
-    pub fn bfs(&self, to_find: T) -> Option<&T> {
+    pub fn bfs(&self, to_search: T) -> Option<&T> {
         use std::collections::VecDeque;
         let root = self.root?;
         let mut queue = VecDeque::<NonNull<Node<T>>>::new();
         unsafe {
             queue.push_back(root);
             while let Some(current) = queue.pop_front() {
-                if (*current.as_ptr()).data == to_find {
+                if (*current.as_ptr()).data == to_search {
                     return Some(&(*current.as_ptr()).data);
                 }
                 if let Some(left) = (*current.as_ptr()).left {
@@ -140,13 +196,13 @@ impl<T: PartialOrd + Debug> BSTree<T> {
     }
 
     //Depth-First Search
-    pub fn dfs(&self, to_find: T) -> Option<&T> {
+    pub fn dfs(&self, to_search: T) -> Option<&T> {
         let mut stack = Vec::<NonNull<Node<T>>>::new();
         let root = self.root?;
         unsafe {
             stack.push(root);
             while let Some(current) = stack.pop() {
-                if (*current.as_ptr()).data == to_find {
+                if (*current.as_ptr()).data == to_search {
                     return Some(&(*current.as_ptr()).data);
                 }
                 if let Some(right) = (*current.as_ptr()).right {
@@ -160,13 +216,13 @@ impl<T: PartialOrd + Debug> BSTree<T> {
         None
     }
 
-    pub fn search(&self, to_find: T) -> Option<&T> {
+    pub fn search(&self, to_search: T) -> Option<&T> {
         let mut root = self.root;
         unsafe {
             while let Some(current) = root {
-                if to_find < (*current.as_ptr()).data {
+                if to_search < (*current.as_ptr()).data {
                     root = (*current.as_ptr()).left;
-                } else if to_find > (*current.as_ptr()).data {
+                } else if to_search > (*current.as_ptr()).data {
                     root = (*current.as_ptr()).right;
                 } else {
                     return Some(&(*current.as_ptr()).data);
