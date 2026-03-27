@@ -9,7 +9,7 @@ pub struct BSTree<T>
 where
     T: PartialOrd + Debug,
 {
-    root: Ptr<Node<T>>,
+    pub(crate) root: Ptr<Node<T>>,
     nodes: u32,
 }
 

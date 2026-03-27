@@ -1,4 +1,5 @@
 pub mod bstree;
+pub mod iter;
 pub mod node;
 pub mod selectable;
 
