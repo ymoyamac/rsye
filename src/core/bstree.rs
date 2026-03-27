@@ -149,22 +149,31 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                         }
                         drop(Box::from_raw(current.as_ptr()));
                         return Some(data);
-                    } else if (*current.as_ptr()).left.is_some()
-                        || (*current.as_ptr()).right.is_some()
-                    {
-                        let parent = (*current.as_ptr()).parent;
-                        let child = match Self::selectable(Some(current)) {
-                            Child::Left(left) => left,
-                            Child::Right(right) => right,
-                            _ => None,
+                    }
+                    if (*current.as_ptr()).left.is_none() || (*current.as_ptr()).right.is_none() {
+                        let child = match (*current.as_ptr()).left {
+                            Some(left) => left,
+                            None => (*current.as_ptr()).right.unwrap(),
                         };
-                        if (*parent.unwrap().as_ptr()).left == Some(current) {
-                            (*parent.unwrap().as_ptr()).left = child;
-                        } else {
-                            (*parent.unwrap().as_ptr()).right = child;
+
+                        match (*current.as_ptr()).parent {
+                            None => {
+                                // current es el root
+                                self.root = Some(child);
+                                (*child.as_ptr()).parent = None;
+                            }
+                            Some(parent) => {
+                                if (*parent.as_ptr()).left == Some(current) {
+                                    (*parent.as_ptr()).left = Some(child);
+                                } else {
+                                    (*parent.as_ptr()).right = Some(child);
+                                }
+                                (*child.as_ptr()).parent = Some(parent);
+                                Self::walk_up(self, parent);
+                            }
                         }
-                        Self::walk_up(self, parent.unwrap());
                         drop(Box::from_raw(current.as_ptr()));
+                        return Some(data);
                     }
                     let mut successor = (*current.as_ptr()).right.unwrap();
                     while let Some(left) = (*successor.as_ptr()).left {
