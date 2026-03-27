@@ -116,7 +116,7 @@ This implementation uses `Option<NonNull<T>>` instead of safe alternatives like 
 ```
 Node {
     value:   T,
-    height:  i32,
+    height:  u32,
     parent:  Option<NonNull<Node<T>>>,
     left:    Option<NonNull<Node<T>>>,
     right:   Option<NonNull<Node<T>>>,
