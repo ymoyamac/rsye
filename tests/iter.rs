@@ -12,3 +12,12 @@ fn iter() {
     assert_eq!(iter.next(), Some(&3));
     assert_eq!(iter.next(), None);
 }
+
+#[test]
+fn iter_for_each() {
+    let nums: [i32; 3] = [1, 2, 3];
+    let tree = BSTree::from(nums);
+    tree.iter().enumerate().for_each(|(i, num)| {
+        assert_eq!(&nums[i], num);
+    });
+}

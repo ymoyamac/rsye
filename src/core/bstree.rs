@@ -164,8 +164,34 @@ impl<T: PartialOrd + Debug> BSTree<T> {
                             (*parent.unwrap().as_ptr()).right = child;
                         }
                         Self::walk_up(self, parent.unwrap());
+                        drop(Box::from_raw(current.as_ptr()));
                     }
-                    //TODO: case 3 is missing: Node has children on the left and right
+                    let mut successor = (*current.as_ptr()).right.unwrap();
+                    while let Some(left) = (*successor.as_ptr()).left {
+                        successor = left;
+                    }
+
+                    let successor_data = (*successor.as_ptr()).data.clone();
+
+                    let successor_parent = (*successor.as_ptr()).parent.unwrap();
+                    let successor_right = (*successor.as_ptr()).right;
+
+                    if (*successor_parent.as_ptr()).left == Some(successor) {
+                        (*successor_parent.as_ptr()).left = successor_right;
+                    } else {
+                        (*successor_parent.as_ptr()).right = successor_right;
+                    }
+
+                    if let Some(sr) = successor_right {
+                        (*sr.as_ptr()).parent = Some(successor_parent);
+                    }
+
+                    drop(Box::from_raw(successor.as_ptr()));
+
+                    (*current.as_ptr()).data = successor_data;
+
+                    Self::walk_up(self, successor_parent);
+                    return Some(data);
                 }
             }
         }
