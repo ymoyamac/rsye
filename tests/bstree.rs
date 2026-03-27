@@ -290,3 +290,44 @@ fn range_single_value() {
     let sub = tree.range(5, 5);
     assert_eq!(sub.as_vec(), vec![5]);
 }
+
+#[test]
+fn delete_leaf_node() {
+    let mut tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.delete(3), Some(3));
+    assert_eq!(tree.as_vec(), vec![5, 7]);
+}
+
+#[test]
+fn delete_node_with_one_child() {
+    let mut tree = BSTree::from([5, 3, 7, 1]);
+    assert_eq!(tree.delete(3), Some(3));
+    assert_eq!(tree.as_vec(), vec![1, 5, 7]);
+}
+
+#[test]
+fn delete_node_with_two_children() {
+    let mut tree = BSTree::from([5, 3, 7, 1, 4]);
+    assert_eq!(tree.delete(3), Some(3));
+    assert_eq!(tree.as_vec(), vec![1, 4, 5, 7]);
+}
+
+#[test]
+fn delete_root() {
+    let mut tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.delete(5), Some(5));
+    assert_eq!(tree.as_vec(), vec![3, 7]);
+}
+
+#[test]
+fn delete_returns_none_when_not_found() {
+    let mut tree = BSTree::from([5, 3, 7]);
+    assert_eq!(tree.delete(99), None);
+}
+
+#[test]
+fn delete_rebalances_tree() {
+    let mut tree = BSTree::from([5, 3, 7, 1, 4, 6, 8]);
+    tree.delete(1);
+    assert_eq!(tree.as_vec(), vec![3, 4, 5, 6, 7, 8]);
+}
